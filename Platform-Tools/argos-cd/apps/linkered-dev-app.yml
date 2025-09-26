@@ -6,9 +6,9 @@ metadata:
 spec:
   project: platform-tools
   source:
-    repoURL: 'https://git.edusuc.net/WEBFORX/ArgoCD-gitops'
+    repoURL: 'https://github.com/ChichiAgha/-Deploy-Linkerd-via-ArgoCD-Helm-Chart.git'
     targetRevision: HEAD
-    path: platform-tools/linkerd/overlays/linkerd/dev
+    path: Platform-Tools/argos-cd/overlays/linkered/dev
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: linkerd
