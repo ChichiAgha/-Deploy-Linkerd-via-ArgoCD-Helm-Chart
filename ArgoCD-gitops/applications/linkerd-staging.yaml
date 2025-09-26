@@ -13,9 +13,66 @@ metadata:
 spec:
   project: platform-tools
   source:
-    repoURL: https://github.com/ChichiAgha/-Deploy-Linkerd-via-ArgoCD-Helm-Chart
-    targetRevision: main
-    path: ArgoCD-gitops/platform-tools/linkerd/overlays/staging
+    repoURL: https://helm.linkerd.io/stable
+    chart: linkerd-control-plane
+    targetRevision: 1.16.11
+    helm:
+      values: |
+        # Staging Environment Configuration
+        linkerdNamespace: linkerd
+        
+        # Higher availability for staging
+        controllerReplicas: 2
+        destinationReplicas: 2
+        identityReplicas: 2
+        
+        # Standard logging for staging
+        controllerLogLevel: info
+        
+        # Proxy configuration for staging
+        proxy:
+          logLevel: info
+          logFormat: plain
+          resources:
+            cpu:
+              request: 100m
+              limit: 1
+            memory:
+              request: 20Mi
+              limit: 250Mi
+        
+        # Identity and mTLS configuration
+        identity:
+          issuer:
+            scheme: linkerd.io/tls
+            clockSkewAllowance: 20s
+            issuanceLifetime: 24h
+        
+        # Staging environment labels
+        podAnnotations:
+          environment: staging
+          managed-by: argocd-staging
+          backup: "enabled"
+          
+        # Resource allocation for staging
+        resources:
+          cpu:
+            request: 200m
+            limit: 2
+          memory:
+            request: 256Mi
+            limit: 1Gi
+            
+        # Enable Pod Disruption Budget for reliability
+        enablePodDisruptionBudget: true
+        
+        # Pod anti-affinity for higher availability
+        enablePodAntiAffinity: true
+        
+        # Security context
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 2103
   destination:
     server: https://kubernetes.default.svc
     namespace: linkerd
@@ -28,7 +85,6 @@ spec:
     - CreateNamespace=true
     - ApplyOutOfSyncOnly=true
     - PrunePropagationPolicy=foreground
-    - PruneLast=true
     retry:
       limit: 5
       backoff:
@@ -44,6 +100,6 @@ spec:
   - name: Project
     value: "platform-tools"
   - name: Helm Chart
-    value: "Official Linkerd Helm Charts"
+    value: "Official Linkerd Helm Chart"
   - name: High Availability
     value: "2x replicas with Pod Disruption Budgets"

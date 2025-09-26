@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-crds
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: linkerd-crds
+    app.kubernetes.io/component: service-mesh-crds
+    project: platform-tools
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform-tools
+  source:
+    repoURL: https://helm.linkerd.io/stable
+    chart: linkerd-crds
+    targetRevision: 1.8.0
+    helm:
+      values: |
+        # Linkerd CRDs Configuration
+        linkerdNamespace: linkerd
+        
+        # Trust domain configuration
+        clusterDomain: cluster.local
+        
+        # Common labels
+        commonLabels:
+          app.kubernetes.io/part-of: linkerd-service-mesh
+          platform.project: platform-tools
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: linkerd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+    - CreateNamespace=true
+    - Replace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  revisionHistoryLimit: 10
+  info:
+  - name: Description
+    value: "Linkerd Custom Resource Definitions"
+  - name: Project
+    value: "platform-tools"
+  - name: Helm Chart
+    value: "Official Linkerd CRDs Helm Chart"
+  - name: Purpose
+    value: "Required CRDs for Linkerd service mesh"

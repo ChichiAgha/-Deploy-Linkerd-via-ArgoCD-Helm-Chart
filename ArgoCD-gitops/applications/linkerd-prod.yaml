@@ -13,19 +13,92 @@ metadata:
 spec:
   project: platform-tools
   source:
-    repoURL: https://github.com/ChichiAgha/-Deploy-Linkerd-via-ArgoCD-Helm-Chart
-    targetRevision: main
-    path: ArgoCD-gitops/platform-tools/linkerd/overlays/prod
+    repoURL: https://helm.linkerd.io/stable
+    chart: linkerd-control-plane
+    targetRevision: 1.16.11
+    helm:
+      values: |
+        # Production Environment Configuration
+        linkerdNamespace: linkerd
+        
+        # Maximum availability for production
+        controllerReplicas: 3
+        destinationReplicas: 3
+        identityReplicas: 3
+        
+        # Minimal logging for production performance
+        controllerLogLevel: warn
+        
+        # Production proxy configuration
+        proxy:
+          logLevel: warn
+          logFormat: plain
+          resources:
+            cpu:
+              request: 200m
+              limit: 2
+            memory:
+              request: 50Mi
+              limit: 500Mi
+        
+        # Identity and mTLS configuration
+        identity:
+          issuer:
+            scheme: linkerd.io/tls
+            clockSkewAllowance: 20s
+            issuanceLifetime: 24h
+        
+        # Production environment annotations
+        podAnnotations:
+          environment: production
+          managed-by: argocd-production
+          backup: "true"
+          monitoring: "enabled"
+          security.policy: "restricted"
+          
+        # Production resource allocation
+        resources:
+          cpu:
+            request: 500m
+            limit: 4
+          memory:
+            request: 512Mi
+            limit: 2Gi
+            
+        # High availability features
+        enablePodDisruptionBudget: true
+        enablePodAntiAffinity: true
+        
+        # Security hardening for production
+        podSecurityContext:
+          runAsNonRoot: true
+          runAsUser: 2103
+          fsGroup: 2103
+          
+        # Container security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 2103
+          capabilities:
+            drop:
+            - ALL
+            
+        # Production monitoring
+        prometheusUrl: http://linkerd-prometheus.linkerd.svc.cluster.local:9090
+        
+        # Control plane tracing for observability
+        controlPlaneTracing: true
   destination:
     server: https://kubernetes.default.svc
     namespace: linkerd
   syncPolicy:
-    # Manual sync for production safety - no automated sync
+    # Manual sync for production safety
     syncOptions:
     - CreateNamespace=true
     - ApplyOutOfSyncOnly=true
     - PrunePropagationPolicy=foreground
-    - PruneLast=true
     retry:
       limit: 3
       backoff:
@@ -41,9 +114,9 @@ spec:
   - name: Project
     value: "platform-tools"
   - name: Helm Chart
-    value: "Official Linkerd Helm Charts"
+    value: "Official Linkerd Helm Chart"
   - name: Security
-    value: "Hardened with mTLS, RBAC, and NetworkPolicies"
+    value: "Hardened with mTLS, RBAC, and SecurityContexts"
   - name: Sync Policy
     value: "Manual approval required for production changes"
   - name: High Availability
