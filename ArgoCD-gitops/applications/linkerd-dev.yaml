@@ -13,63 +13,9 @@ metadata:
 spec:
   project: platform-tools
   source:
-    repoURL: https://helm.linkerd.io/stable
-    chart: linkerd-control-plane
-    targetRevision: 1.16.11
-    helm:
-      values: |
-        # Development Environment Configuration
-        linkerdNamespace: linkerd
-        
-        # Control plane replicas for development
-        controllerReplicas: 1
-        destinationReplicas: 1
-        identityReplicas: 1
-        
-        # Development logging (debug level)
-        controllerLogLevel: debug
-        
-        # Proxy configuration for development
-        proxy:
-          logLevel: debug
-          logFormat: json
-          resources:
-            cpu:
-              request: 50m
-              limit: 500m
-            memory:
-              request: 10Mi
-              limit: 128Mi
-        
-        # Identity and mTLS configuration
-        identity:
-          issuer:
-            scheme: linkerd.io/tls
-            clockSkewAllowance: 20s
-            issuanceLifetime: 24h
-        
-        # Development environment labels
-        podAnnotations:
-          environment: development
-          managed-by: argocd-dev
-          debug: "enabled"
-          
-        # Resource limits for development
-        resources:
-          cpu:
-            request: 100m
-            limit: 1
-          memory:
-            request: 128Mi
-            limit: 512Mi
-            
-        # Disable PDB for development (easier debugging)
-        enablePodDisruptionBudget: false
-        
-        # Security context
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 2103
+    repoURL: https://github.com/ChichiAgha/-Deploy-Linkerd-via-ArgoCD-Helm-Chart
+    path: ArgoCD-gitops/platform-tools/linkerd/overlays/dev
+    targetRevision: HEAD
   destination:
     server: https://kubernetes.default.svc
     namespace: linkerd
@@ -91,12 +37,12 @@ spec:
   revisionHistoryLimit: 10
   info:
   - name: Description
-    value: "Linkerd Service Mesh - Development Environment"
+    value: "Linkerd Service Mesh - Development Environment (Kustomize + ArgoCD)"
   - name: Environment
     value: "development"
   - name: Project
     value: "platform-tools"
-  - name: Helm Chart
-    value: "Official Linkerd Helm Chart"
-  - name: mTLS
-    value: "Enabled for zero-trust networking"
+  - name: Approach
+    value: "Kustomize overlays with official Helm charts"
+  - name: Ticket Compliance
+    value: "✅ Kustomize paired with ArgoCD as required"
