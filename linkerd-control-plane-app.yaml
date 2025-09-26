@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-control-plane
+  namespace: argocd
+spec:
+  project: platform-tools
+  source:
+    chart: linkerd-control-plane
+    repoURL: https://helm.linkerd.io/stable
+    targetRevision: ""  # latest version
+    helm:
+      values: |
+        identity:
+          issuer:
+            crtExpiry: "87600h"
+        proxy:
+          resources:
+            requests:
+              cpu: "10m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+        controller:
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "512Mi"
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: linkerd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: "5s"
+        factor: 2
+        maxDuration: "3m"

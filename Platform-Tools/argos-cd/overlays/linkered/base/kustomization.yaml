@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# create the linkerd namespace
+resources:
+  - namespace.yaml
+  - rolebinding-platform-admins.yaml
+
+# Use Kustomize helmCharts to inflate the official Linkerd charts (CRDs then control plane)
+helmCharts:
+  - name: linkerd-crds
+    repo: https://helm.linkerd.io/stable
+    version: ""             # pin a version if desired (recommended in prod)
+    releaseName: linkerd-crds
+    namespace: linkerd
+    valuesFile: chart-values-common.yaml
+
+  - name: linkerd-control-plane
+    repo: https://helm.linkerd.io/stable
+    version: ""             # pin a version if desired
+    releaseName: linkerd-control-plane
+    namespace: linkerd
+    valuesFile: values.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true

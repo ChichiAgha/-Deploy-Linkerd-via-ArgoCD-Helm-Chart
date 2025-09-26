@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-staging
+  namespace: argocd
+spec:
+  project: platform-tools
+  source:
+    repoURL: 'https://git.edusuc.net/WEBFORX/ArgoCD-gitops'
+    targetRevision: HEAD
+    path: platform-tools/linkerd/overlays/linkerd/staging
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: linkerd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: "5s"
+        factor: 2
+        maxDuration: "3m"
+  info:
+    - name: "purpose"
+      value: "Linkerd service mesh (staging)"

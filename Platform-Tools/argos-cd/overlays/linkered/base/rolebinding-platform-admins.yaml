@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: linkerd-namespace-admin
+  namespace: linkerd
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: linkerd-platform-admins-binding
+  namespace: linkerd
+subjects:
+  - kind: Group
+    name: platform-admins       # replace with your platform admin group
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: linkerd-namespace-admin
+  apiGroup: rbac.authorization.k8s.io
