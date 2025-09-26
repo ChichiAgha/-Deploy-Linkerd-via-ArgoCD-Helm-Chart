@@ -8,12 +8,26 @@ spec:
   source:
     chart: linkerd-control-plane
     repoURL: https://helm.linkerd.io/stable
-    targetRevision: ""  # latest version
+    targetRevision: "1.16.11"  # specify a version
     helm:
       values: |
         identity:
           issuer:
             crtExpiry: "87600h"
+            scheme: linkerd.io/tls
+        identityTrustAnchorsPEM: |
+          -----BEGIN CERTIFICATE-----
+          MIIBjzCCATWgAwIBAgIRAMR3PxTOxqiVvO3HPo6XOSAwCgYIKoZIzj0EAwIwJTEj
+          MCEGA1UEAxMabGlua2VyZC1pZGVudGl0eS5saW5rZXJkLmlvMB4XDTI1MDkyNjEz
+          NTcwMFoXDTM1MDkyNDEzNTcwMFowJTEjMCEGA1UEAxMabGlua2VyZC1pZGVudGl0
+          eS5saW5rZXJkLmlvMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaQU4TnqzKCB3
+          5lrpY7I8TQzF0CKzVkDgFxzJlxR+tYU2X2/cKJ9K9ZLcQqXm1J1L5R+xZ9Q3nK4a
+          XzT7Km+NJqNTMFEwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMCAQYwHQYD
+          VR0OBBYEFOqUJLFUQwfJ5L2M2nO3X8FnR5N/MA8GA1UdEwEB/wQFMAMBAf8wCgYI
+          KoZIzj0EAwIDSAAwRQIhAKoZ5KePD0Ku5+CU1p6wnBY6c1LwgFxY9H5zJoZvTvkM
+          AiBcqC1mKoN3FnhG6KcXBfq4T7Hq7pJ1wG9Q7J2FxK+zRw==
+          -----END CERTIFICATE-----
+        identityTrustDomain: cluster.local
         proxy:
           resources:
             requests:
