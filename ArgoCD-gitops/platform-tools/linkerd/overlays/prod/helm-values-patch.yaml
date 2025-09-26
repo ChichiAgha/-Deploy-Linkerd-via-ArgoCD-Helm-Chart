@@ -1,0 +1,85 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: linkerd-production-values
+
+# Production-specific Helm values override
+helmCharts:
+  - name: linkerd-control-plane
+    repo: https://helm.linkerd.io/stable
+    version: 1.16.11
+    namespace: linkerd
+    releaseName: linkerd-control-plane-prod
+    valuesInline:
+      # Production configuration - maximum availability
+      controllerReplicas: 3
+      destinationReplicas: 3
+      identityReplicas: 3
+      
+      # Minimal logging for production performance
+      controllerLogLevel: warn
+      
+      # Production proxy configuration
+      proxy:
+        logLevel: warn,linkerd=info
+        logFormat: plain
+        resources:
+          cpu:
+            request: 200m
+            limit: 2
+          memory:
+            request: 50Mi
+            limit: 500Mi
+      
+      # Production environment annotations
+      podAnnotations:
+        environment: production
+        backup: "true"
+        monitoring: "enabled"
+        security.policy: "restricted"
+        
+      # Production resource allocation
+      resources:
+        cpu:
+          request: 500m
+          limit: 4
+        memory:
+          request: 512Mi
+          limit: 2Gi
+          
+      # High availability features
+      enablePodDisruptionBudget: true
+      enablePodAntiAffinity: true
+      
+      # Security hardening for production
+      podSecurityContext:
+        runAsNonRoot: true
+        runAsUser: 2103
+        fsGroup: 2103
+        
+      # Container security context
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 2103
+        capabilities:
+          drop:
+          - ALL
+          
+      # Production mTLS configuration
+      identity:
+        issuer:
+          scheme: linkerd.io/tls
+          clockSkewAllowance: 20s
+          issuanceLifetime: 24h
+          
+      # Network policy enforcement
+      networkPolicy:
+        enabled: true
+        
+      # Production monitoring
+      prometheusUrl: http://linkerd-prometheus.linkerd.svc.cluster.local:9090
+      
+      # Control plane tracing for observability
+      controlPlaneTracing: true

@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../base
+
+namePrefix: prod-
+
+commonLabels:
+  environment: production
+  tier: production
+  criticality: high
+
+commonAnnotations:
+  environment: production
+  managed-by: argocd-production
+  backup: "true"
+  monitoring: "enabled"
+
+patchesStrategicMerge:
+  - helm-values-patch.yaml

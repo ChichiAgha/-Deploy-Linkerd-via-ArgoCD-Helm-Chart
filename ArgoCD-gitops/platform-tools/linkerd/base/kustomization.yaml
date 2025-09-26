@@ -1,0 +1,85 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: linkerd
+
+resources:
+  - namespace.yaml
+
+# Use Helm charts via generators
+helmCharts:
+  # Linkerd CRDs Chart
+  - name: linkerd-crds
+    repo: https://helm.linkerd.io/stable
+    version: 1.8.0
+    namespace: linkerd
+    releaseName: linkerd-crds
+    includeCRDs: true
+    valuesInline:
+      linkerdNamespace: linkerd
+      
+  # Linkerd Control Plane Chart  
+  - name: linkerd-control-plane
+    repo: https://helm.linkerd.io/stable
+    version: 1.16.11
+    namespace: linkerd
+    releaseName: linkerd-control-plane
+    valuesInline:
+      # Base configuration
+      linkerdNamespace: linkerd
+      
+      # Control plane replicas (base)
+      controllerReplicas: 1
+      destinationReplicas: 1
+      identityReplicas: 1
+      
+      # Logging configuration
+      controllerLogLevel: info
+      
+      # Identity and mTLS configuration
+      identity:
+        issuer:
+          scheme: linkerd.io/tls
+          clockSkewAllowance: 20s
+          issuanceLifetime: 24h
+        
+      # Global proxy configuration
+      proxy:
+        logLevel: warn,linkerd=info
+        logFormat: plain
+        resources:
+          cpu:
+            request: 100m
+            limit: 1
+          memory:
+            request: 20Mi
+            limit: 250Mi
+        
+      # Proxy init configuration
+      proxyInit:
+        resources:
+          cpu:
+            request: 10m
+            limit: 100m
+          memory:
+            request: 10Mi
+            limit: 50Mi
+            
+      # Security configurations
+      enablePodAntiAffinity: false
+      
+      # Pod security context
+      podSecurityPolicy:
+        enabled: false
+
+# Common labels for GitOps tracking
+commonLabels:
+  app.kubernetes.io/name: linkerd
+  app.kubernetes.io/part-of: linkerd-service-mesh
+  app.kubernetes.io/managed-by: argocd
+  platform.project: platform-tools
+
+# Common annotations
+commonAnnotations:
+  argocd.argoproj.io/managed: "true"
+  config.linkerd.io/created-by: argocd-gitops

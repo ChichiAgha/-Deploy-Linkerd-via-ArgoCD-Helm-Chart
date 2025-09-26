@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-prod
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: linkerd
+    app.kubernetes.io/component: service-mesh
+    environment: production
+    project: platform-tools
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: platform-tools
+  source:
+    repoURL: https://github.com/ChichiAgha/-Deploy-Linkerd-via-ArgoCD-Helm-Chart
+    targetRevision: main
+    path: ArgoCD-gitops/platform-tools/linkerd/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: linkerd
+  syncPolicy:
+    # Manual sync for production safety - no automated sync
+    syncOptions:
+    - CreateNamespace=true
+    - ApplyOutOfSyncOnly=true
+    - PrunePropagationPolicy=foreground
+    - PruneLast=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+  revisionHistoryLimit: 25
+  info:
+  - name: Description
+    value: "Linkerd Service Mesh - Production Environment"
+  - name: Environment
+    value: "production"
+  - name: Project
+    value: "platform-tools"
+  - name: Helm Chart
+    value: "Official Linkerd Helm Charts"
+  - name: Security
+    value: "Hardened with mTLS, RBAC, and NetworkPolicies"
+  - name: Sync Policy
+    value: "Manual approval required for production changes"
+  - name: High Availability
+    value: "3x replicas with anti-affinity and PDBs"

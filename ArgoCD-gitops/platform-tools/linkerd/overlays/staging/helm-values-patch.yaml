@@ -1,0 +1,52 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: linkerd-staging-values
+
+# Staging-specific Helm values override
+helmCharts:
+  - name: linkerd-control-plane
+    repo: https://helm.linkerd.io/stable
+    version: 1.16.11
+    namespace: linkerd
+    releaseName: linkerd-control-plane-staging
+    valuesInline:
+      # Staging configuration - higher availability
+      controllerReplicas: 2
+      destinationReplicas: 2
+      identityReplicas: 2
+      
+      # Standard logging for staging
+      controllerLogLevel: info
+      
+      # Staging proxy configuration
+      proxy:
+        logLevel: info,linkerd=info
+        logFormat: plain
+        resources:
+          cpu:
+            request: 100m
+            limit: 1
+          memory:
+            request: 20Mi
+            limit: 250Mi
+      
+      # Staging environment annotations
+      podAnnotations:
+        environment: staging
+        backup: "enabled"
+        
+      # Resource allocation for staging
+      resources:
+        cpu:
+          request: 200m
+          limit: 2
+        memory:
+          request: 256Mi
+          limit: 1Gi
+          
+      # Enable Pod Disruption Budget for reliability
+      enablePodDisruptionBudget: true
+      
+      # Pod anti-affinity for higher availability
+      enablePodAntiAffinity: true
