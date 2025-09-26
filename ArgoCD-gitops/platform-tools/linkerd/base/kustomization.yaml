@@ -5,14 +5,7 @@ namespace: linkerd
 
 resources:
   - namespace.yaml
-
-# Official Linkerd CRDs - deployed once, shared by all environments
-helmCharts:
-  - name: linkerd-crds
-    repo: https://helm.linkerd.io/stable
-    version: 1.8.0
-    namespace: linkerd
-    releaseName: linkerd-crds
+  - linkerd-config.yaml
 
 # Common labels for GitOps tracking
 labels:
