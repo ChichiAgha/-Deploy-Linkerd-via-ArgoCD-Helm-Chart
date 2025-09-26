@@ -12,14 +12,8 @@ metadata:
   - resources-finalizer.argocd.argoproj.io
 spec:
   project: platform-tools
-  sources:
-  - repoURL: https://helm.linkerd.io/stable
-    chart: linkerd-crds
-    targetRevision: 1.8.0
-    helm:
-      values: |
-        linkerdNamespace: linkerd
-  - repoURL: https://github.com/ChichiAgha/-Deploy-Linkerd-via-ArgoCD-Helm-Chart
+  source:
+    repoURL: https://github.com/ChichiAgha/-Deploy-Linkerd-via-ArgoCD-Helm-Chart
     path: ArgoCD-gitops/platform-tools/linkerd/overlays/dev
     targetRevision: HEAD
   destination:
