@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: linkerd-crds-gitops
+  namespace: argocd
+spec:
+  project: platform-tools
+  source:
+    repoURL: 'https://github.com/ChichiAgha/-Deploy-Linkerd-via-ArgoCD-Helm-Chart.git'
+    targetRevision: HEAD
+    path: '.'
+    directory:
+      include: 'linkerd-crds-app.yaml'
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: "5s"
+        factor: 2
+        maxDuration: "3m"
