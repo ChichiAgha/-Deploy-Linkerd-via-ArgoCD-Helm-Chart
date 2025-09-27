@@ -32,10 +32,32 @@ helmCharts:
             request: 10Mi
             limit: 128Mi
       
+      # mTLS Identity Configuration
+      identity:
+        issuer:
+          scheme: linkerd.io/tls
+          clockSkewAllowance: 20s
+          issuanceLifetime: 24h
+      
+      # Trust anchor for mTLS
+      identityTrustAnchorsPEM: |
+        -----BEGIN CERTIFICATE-----
+        MIIBhzCCAS6gAwIBAgIBATAKBggqhkjOPQQDAjAcMRowGAYDVQQDExFpZGVudGl0
+        eS5saW5rZXJkLjAeFw0yNTA5MjcwMDM2MDRaFw0yNjA5MjcwMDM2MjRaMBwxGjAY
+        BgNVBAMTEWlkZW50aXR5LmxpbmtlcmQuMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcD
+        QgAEM7FdtOXmDeqY64yHYWM6SUKUqY6qBOI4ceSGO5JzET9xmU1rjB/s5uMDImLT
+        JcUwrUbyY9c1Vu47AKwaP2Hn8qNhMF8wDgYDVR0PAQH/BAQDAgEGMB0GA1UdJQQW
+        MBQGCCsGAQUFBwMBBggrBgEFBQcDAjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQW
+        BBTThfTW08k4ZAG0qce1t6hKTObvZDAKBggqhkjOPQQDAgNHADBEAiB+B4QBhWW6
+        uWtUORt/xu411pMYQgd12ek3Ih2T6ZY4AQIgCCWkPGPUWsx+UdxHPX+R7VOyTtqQ
+        oWFP1xjYzMD3gaU=
+        -----END CERTIFICATE-----
+      
       # Development environment annotations
       podAnnotations:
         environment: development
         debug: "enabled"
+        mtls.enabled: "true"
         
       # Resource limits for development
       resources:
@@ -55,8 +77,10 @@ labels:
   pairs:
     environment: development
     tier: dev
+    mtls.enabled: "true"
 
 # Development-specific annotations  
 commonAnnotations:
   environment: development
   managed-by: argocd-dev
+  linkerd.mtls: "enabled"
